@@ -87,8 +87,6 @@
         };
       });
 
-      this.directionsRenderer.setMap(null);
-
       /** polylineをレンダリングする際のオプション */
       this.directionsRenderer.setOptions({
         suppressMarkers: true, // マーカーを非表示にする場合はtrue
@@ -114,6 +112,7 @@
         (response, status) => {
           if (status === google.maps.DirectionsStatus.OK) {
             // directions apiのレスポンスをセット
+            this.directionsRenderer.setMap(null);
             this.directionsRenderer.setDirections(response);
             this.directionsRenderer.setMap(this.map); // polylineを地図に表示
             return;
