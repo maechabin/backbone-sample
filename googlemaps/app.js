@@ -20,7 +20,9 @@
     el: '#content',
     template: _.template($('#googlemaps-template').html()),
     initialize() {
+      this.directionsRenderer = new google.maps.DirectionsRenderer();
       this.collection.on('add', this.handleAdd, this);
+      this.collection.on('remove', this.handleRemove, this);
       this.render();
     },
     style: {
@@ -46,30 +48,33 @@
     },
     initMarker(marker) {
       if (marker) {
-        const [lat, lng] = marker.get('latlng');
-        this.addMarker(lat, lng);
+        this.addMarker(marker);
         return;
       }
       const bounds = new google.maps.LatLngBounds();
-      this.collection.each(mark => {
-        const [lat, lng] = mark.get('latlng');
-        const marker = this.addMarker(lat, lng);
+      this.collection.each(m => {
+        const marker = this.addMarker(m);
         bounds.extend(marker.getPosition());
       });
       this.map.fitBounds(bounds);
     },
-    addMarker(lat, lng) {
+    addMarker(markerInfo) {
+      const [lat, lng] = markerInfo.get('latlng');
       const marker = new google.maps.Marker({
         map: this.map,
         draggable: false,
         position: { lat, lng },
         title: this.model.get('title'),
       });
+
+      marker.addListener('click', event => {
+        this.collection.remove(markerInfo);
+        marker.setMap(null);
+      });
       return marker;
     },
     initPolyline() {
       const directionsService = new google.maps.DirectionsService();
-      const directionsRenderer = new google.maps.DirectionsRenderer();
       const [origin, ...rest] = this.collection.each(marker => marker);
       const originLatLng = origin.get('latlng');
       const destinationLatLng = rest.pop().get('latlng');
@@ -82,8 +87,10 @@
         };
       });
 
+      this.directionsRenderer.setMap(null);
+
       /** polylineをレンダリングする際のオプション */
-      directionsRenderer.setOptions({
+      this.directionsRenderer.setOptions({
         suppressMarkers: true, // マーカーを非表示にする場合はtrue
         preserveViewport: true, // zoomさせないようにする場合はtrue
         polylineOptions: {
@@ -107,9 +114,8 @@
         (response, status) => {
           if (status === google.maps.DirectionsStatus.OK) {
             // directions apiのレスポンスをセット
-            directionsRenderer.setDirections(response);
-
-            directionsRenderer.setMap(this.map); // polylineを地図に表示
+            this.directionsRenderer.setDirections(response);
+            this.directionsRenderer.setMap(this.map); // polylineを地図に表示
             return;
           }
           return console.log(`status: ${status}`);
@@ -118,6 +124,9 @@
     },
     handleAdd(marker) {
       this.initMarker(marker);
+      this.initPolyline();
+    },
+    handleRemove() {
       this.initPolyline();
     },
     render() {
