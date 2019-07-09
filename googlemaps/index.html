@@ -4,23 +4,18 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
     <title>Template of Backbone.js</title>
-    <style>
-      body {
-        margin: 0;
-        padding: 0;
-      }
-      .googlemap {
-        overflow: auto;
-        width: 100%;
-        height: 100vh;
-      }
-    </style>
+    <link rel="preload" href="./app.css" as="style" />
+    <link
+      rel="preload"
+      href="https://maps.googleapis.com/maps/api/js?key=AIzaSyAWgnWpVGWYgIHEf2b_u41HeWxg7-WvDm8"
+      as="script"
+    />
+    <link rel="preload" href="./app.js" as="script" />
+    <link rel="stylesheet" href="./app.css" />
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAWgnWpVGWYgIHEf2b_u41HeWxg7-WvDm8"></script>
   </head>
   <body>
-    <!-- ========= -->
     <!-- Your HTML -->
-    <!-- ========= -->
     <div id="content">
       ...
     </div>
@@ -29,9 +24,7 @@
       <div class="googlemap"></div>
     </script>
 
-    <!-- ========= -->
     <!-- Libraries -->
-    <!-- ========= -->
     <script
       src="https://code.jquery.com/jquery-3.4.1.min.js"
       integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo="
@@ -42,9 +35,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/backbone.js/1.4.0/backbone-min.js"></script>
     <!-- <script src="http://cdnjs.cloudflare.com/ajax/libs/backbone-localstorage.js/1.0/backbone.localStorage-min.js"></script> -->
 
-    <!-- =============== -->
     <!-- Javascript code -->
-    <!-- =============== -->
     <script src="./app.js"></script>
   </body>
 </html>
