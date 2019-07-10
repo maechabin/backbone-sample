@@ -2,10 +2,13 @@
   // Model
   const Marker = Backbone.Model.extend({
     defaults: {
+      id: '',
       title: 'marker',
       latlng: [-34.397, 150.644],
     },
-    initialize() {},
+    initialize() {
+      // TODO idを自動付与する処理追加
+    },
   });
 
   // Collection
@@ -63,7 +66,7 @@
     addMarker(markerInfo) {
       const [lat, lng] = markerInfo.get('latlng');
       const icon =
-        markerInfo.cid === 'c2' || markerInfo.cid === 'c3'
+        markerInfo.get('id') === 1 || markerInfo.get('id') === 2
           ? 'https://mt.googleapis.com/vt/icon/name=icons/spotlight/spotlight-poi.png&scale=1'
           : 'https://mt.google.com/vt/icon?color=ff004C13&name=icons/spotlight/spotlight-waypoint-blue.png';
       const marker = new google.maps.Marker({
@@ -75,7 +78,7 @@
       });
 
       marker.addListener('click', event => {
-        if (markerInfo.cid === 'c2' || markerInfo.cid === 'c3') {
+        if (markerInfo.get('id') === 1 || markerInfo.get('id') === 2) {
           return;
         }
         this.collection.remove(markerInfo);
@@ -89,6 +92,7 @@
           latlng: markerInfo.get('latlng'),
         };
         markerInfo.set('latlng', [event.latLng.lat(), event.latLng.lng()]);
+        console.log(`${event.latLng.lat()}, ${event.latLng.lng()}`);
       });
 
       return marker;
@@ -181,16 +185,32 @@
     },
   });
 
+  const ButtonView = Backbone.View.extend({
+    el: '.button',
+    events: {
+      click: 'handleClick',
+    },
+    handleClick() {
+      mapView.collection.reset(initialData);
+      mapView.render();
+    },
+  });
+
+  const initialData = [
+    {
+      id: 1,
+      title: '',
+      latlng: [35.70297300018472, 139.90232151621774],
+    },
+    {
+      id: 2,
+      title: '',
+      latlng: [35.583059491197396, 139.63348388671875],
+    },
+  ];
   const marker = new Marker();
-  const markers = new Markers([
-    {
-      title: '',
-      latlng: [35.67348483475877, 139.80550449961618],
-    },
-    {
-      title: '',
-      latlng: [35.65869101589245, 139.7454071044922],
-    },
-  ]);
+  const markers = new Markers(initialData);
+
   const mapView = new MapView({ model: marker, collection: markers });
+  const buttonView = new ButtonView();
 })();
