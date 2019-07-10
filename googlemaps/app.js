@@ -20,6 +20,7 @@
     template: _.template($('#googlemaps-template').html()),
     initialize() {
       this.directionsRenderer = new google.maps.DirectionsRenderer();
+      this.prevMarker = {};
       this.collection.on('add', this.handleAdd, this);
       this.collection.on('remove', this.handleRemove, this);
       this.collection.on('change', this.handleChange, this);
@@ -82,6 +83,11 @@
       });
 
       marker.addListener('dragend', event => {
+        this.prevMarker = {
+          ...this.prevMarker,
+          marker,
+          latlng: markerInfo.get('latlng'),
+        };
         markerInfo.set('latlng', [event.latLng.lat(), event.latLng.lng()]);
       });
 
@@ -157,8 +163,14 @@
     handleRemove() {
       this.initPolyline();
     },
-    handleChange() {
-      this.initPolyline();
+    handleChange(marker) {
+      this.initPolyline(isError => {
+        if (isError) {
+          const [lat, lng] = this.prevMarker.latlng;
+          this.prevMarker.marker.setPosition(new google.maps.LatLng(lat, lng));
+          marker.set('latlng', this.prevMarker.latlng);
+        }
+      });
     },
     render() {
       this.$el.html(this.template(this.style));
