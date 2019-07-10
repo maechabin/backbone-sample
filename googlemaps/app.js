@@ -23,6 +23,7 @@
       this.directionsRenderer = new google.maps.DirectionsRenderer();
       this.collection.on('add', this.handleAdd, this);
       this.collection.on('remove', this.handleRemove, this);
+      this.collection.on('change', this.handleChange, this);
       this.render();
     },
     style: {
@@ -62,7 +63,7 @@
       const [lat, lng] = markerInfo.get('latlng');
       const marker = new google.maps.Marker({
         map: this.map,
-        draggable: false,
+        draggable: true,
         position: { lat, lng },
         title: this.model.get('title'),
       });
@@ -71,9 +72,14 @@
         this.collection.remove(markerInfo);
         marker.setMap(null);
       });
+
+      marker.addListener('dragend', event => {
+        markerInfo.set('latlng', [event.latLng.lat(), event.latLng.lng()]);
+      });
+
       return marker;
     },
-    initPolyline() {
+    initPolyline(marker, isError) {
       const directionsService = new google.maps.DirectionsService();
       const [origin, ...rest] = this.collection.each(marker => marker);
       const originLatLng = origin.get('latlng');
@@ -116,17 +122,32 @@
             this.directionsRenderer.setMap(null);
             this.directionsRenderer.setDirections(response);
             this.directionsRenderer.setMap(this.map); // polylineを地図に表示
+            if (isError) {
+              isError(false);
+            }
             return;
           }
-          return console.log(`status: ${status}`);
+
+          alert(`status: ${status}`);
+          if (isError) {
+            isError(true);
+          }
         },
       );
     },
     handleAdd(marker) {
-      this.initMarker(marker);
-      this.initPolyline();
+      this.initPolyline(marker, isError => {
+        if (isError) {
+          this.collection.remove(marker);
+        } else {
+          this.initMarker(marker);
+        }
+      });
     },
     handleRemove() {
+      this.initPolyline();
+    },
+    handleChange() {
       this.initPolyline();
     },
     render() {
