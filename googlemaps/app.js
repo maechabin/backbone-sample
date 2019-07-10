@@ -107,7 +107,8 @@
             destinationLatLng[0],
             destinationLatLng[1],
           ), // 到着地
-          travelMode: google.maps.TravelMode.DRIVING,
+          travelMode: google.maps.TravelMode.WALKING,
+          optimizeWaypoints: true, // 経路を最適化
         },
         (response, status) => {
           if (status === google.maps.DirectionsStatus.OK) {
