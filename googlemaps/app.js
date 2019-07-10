@@ -2,12 +2,7 @@
   // Model
   const Marker = Backbone.Model.extend({
     defaults: {
-      id: '',
-      title: 'marker',
       latlng: [-34.397, 150.644],
-    },
-    initialize() {
-      // TODO idを自動付与する処理追加
     },
   });
 
@@ -46,7 +41,6 @@
       google.maps.event.addListener(this.map, 'click', event => {
         console.log(`${event.latLng.lat()}, ${event.latLng.lng()}`);
         this.collection.add({
-          title: '',
           latlng: [event.latLng.lat(), event.latLng.lng()],
         });
       });
@@ -73,7 +67,6 @@
         map: this.map,
         draggable: true,
         position: { lat, lng },
-        title: this.model.get('title'),
         icon,
       });
 
@@ -199,12 +192,10 @@
   const initialData = [
     {
       id: 1,
-      title: '',
       latlng: [35.70297300018472, 139.90232151621774],
     },
     {
       id: 2,
-      title: '',
       latlng: [35.583059491197396, 139.63348388671875],
     },
   ];
