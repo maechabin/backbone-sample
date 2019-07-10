@@ -5,14 +5,13 @@
       title: 'marker',
       latlng: [-34.397, 150.644],
     },
+    initialize() {},
   });
 
   // Collection
   const Markers = Backbone.Collection.extend({
     model: Marker,
-    initialize() {
-      console.log('aaa');
-    },
+    initialize() {},
   });
 
   // View
@@ -41,6 +40,7 @@
       this.map = new google.maps.Map(mapDiv, mapOptions);
 
       google.maps.event.addListener(this.map, 'click', event => {
+        console.log(`${event.latLng.lat()}, ${event.latLng.lng()}`);
         this.collection.add({
           title: '',
           latlng: [event.latLng.lat(), event.latLng.lng()],
@@ -61,14 +61,22 @@
     },
     addMarker(markerInfo) {
       const [lat, lng] = markerInfo.get('latlng');
+      const icon =
+        markerInfo.cid === 'c2' || markerInfo.cid === 'c3'
+          ? 'https://mt.googleapis.com/vt/icon/name=icons/spotlight/spotlight-poi.png&scale=1'
+          : 'https://mt.google.com/vt/icon?color=ff004C13&name=icons/spotlight/spotlight-waypoint-blue.png';
       const marker = new google.maps.Marker({
         map: this.map,
         draggable: true,
         position: { lat, lng },
         title: this.model.get('title'),
+        icon,
       });
 
       marker.addListener('click', event => {
+        if (markerInfo.cid === 'c2' || markerInfo.cid === 'c3') {
+          return;
+        }
         this.collection.remove(markerInfo);
         marker.setMap(null);
       });
@@ -79,12 +87,14 @@
 
       return marker;
     },
-    initPolyline(marker, isError) {
+    initPolyline(isError) {
       const directionsService = new google.maps.DirectionsService();
-      const [origin, ...rest] = this.collection.each(marker => marker);
+      const [origin, destination, ...waypoints] = this.collection.each(
+        marker => marker,
+      );
       const originLatLng = origin.get('latlng');
-      const destinationLatLng = rest.pop().get('latlng');
-      const waypointsLatLng = rest.map(point => {
+      const destinationLatLng = destination.get('latlng');
+      const waypointsLatLng = waypoints.map(point => {
         return {
           location: new google.maps.LatLng(
             point.get('latlng')[0],
@@ -136,7 +146,7 @@
       );
     },
     handleAdd(marker) {
-      this.initPolyline(marker, isError => {
+      this.initPolyline(isError => {
         if (isError) {
           this.collection.remove(marker);
         } else {
@@ -163,11 +173,11 @@
   const markers = new Markers([
     {
       title: '',
-      latlng: [-34.397, 150.644],
+      latlng: [35.67348483475877, 139.80550449961618],
     },
     {
       title: '',
-      latlng: [-34.197, 150.544],
+      latlng: [35.65869101589245, 139.7454071044922],
     },
   ]);
   const mapView = new MapView({ model: marker, collection: markers });
