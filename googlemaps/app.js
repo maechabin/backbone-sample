@@ -100,7 +100,7 @@
         polylineOptions: {
           strokeOpacity: 1.0, // polylineの透明度0.0~1.0
           strokeWeight: 6, // polylineの幅（ピクセル）
-          strokeColor: '#6991fd', // polylineの色
+          strokeColor: '#0072f1', // polylineの色
         },
       });
 
