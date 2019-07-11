@@ -1,14 +1,14 @@
 (function() {
   // Model
-  const Marker = Backbone.Model.extend({
+  const Point = Backbone.Model.extend({
     defaults: {
       latlng: [-34.397, 150.644],
     },
   });
 
   // Collection
-  const Markers = Backbone.Collection.extend({
-    model: Marker,
+  const Points = Backbone.Collection.extend({
+    model: Point,
     initialize() {},
   });
 
@@ -16,9 +16,10 @@
   const MapView = Backbone.View.extend({
     el: '#content',
     template: _.template($('#googlemaps-template').html()),
+    preinitialize() {},
     initialize() {
       this.directionsRenderer = new google.maps.DirectionsRenderer();
-      this.prevMarker = {};
+      this.prevMarker = { marker: null, latlng: null };
       this.collection.on('add', this.handleAdd, this);
       this.collection.on('remove', this.handleRemove, this);
       this.collection.on('change', this.handleChange, this);
@@ -28,7 +29,7 @@
       width: '50%',
     },
     initMap() {
-      const [lat, lng] = this.model.get('marker').get('latlng');
+      const [lat, lng] = this.model.get('point').get('latlng');
       const mapOptions = {
         center: new google.maps.LatLng(lat, lng),
         zoom: 8,
@@ -45,22 +46,22 @@
         });
       });
     },
-    initMarker(marker) {
-      if (marker) {
-        this.addMarker(marker);
+    initMarker(point) {
+      if (point) {
+        this.addMarker(point);
         return;
       }
       const bounds = new google.maps.LatLngBounds();
-      this.collection.each(m => {
-        const marker = this.addMarker(m);
+      this.collection.each(point => {
+        const marker = this.addMarker(point);
         bounds.extend(marker.getPosition());
       });
       this.map.fitBounds(bounds);
     },
-    addMarker(markerInfo) {
-      const [lat, lng] = markerInfo.get('latlng');
+    addMarker(point) {
+      const [lat, lng] = point.get('latlng');
       const icon =
-        markerInfo.id === 1 || markerInfo.id === 2
+        point.id === 1 || point.id === 2
           ? 'https://mt.googleapis.com/vt/icon/name=icons/spotlight/spotlight-poi.png&scale=1'
           : 'https://mt.google.com/vt/icon?color=ff004C13&name=icons/spotlight/spotlight-waypoint-blue.png';
       const marker = new google.maps.Marker({
@@ -71,10 +72,10 @@
       });
 
       marker.addListener('click', event => {
-        if (markerInfo.id === 1 || markerInfo.id === 2) {
+        if (point.id === 1 || point.id === 2) {
           return;
         }
-        this.collection.remove(markerInfo);
+        this.collection.remove(point);
         marker.setMap(null);
       });
 
@@ -82,9 +83,9 @@
         this.prevMarker = {
           ...this.prevMarker,
           marker,
-          latlng: markerInfo.get('latlng'),
+          latlng: point.get('latlng'),
         };
-        markerInfo.set({ latlng: [event.latLng.lat(), event.latLng.lng()] });
+        point.set({ latlng: [event.latLng.lat(), event.latLng.lng()] });
         console.log(`${event.latLng.lat()}, ${event.latLng.lng()}`);
       });
 
@@ -93,15 +94,15 @@
     initPolyline(isError) {
       const directionsService = new google.maps.DirectionsService();
       const [origin, destination, ...waypoints] = this.collection.each(
-        marker => marker,
+        point => point,
       );
       const originLatLng = origin.get('latlng');
       const destinationLatLng = destination.get('latlng');
-      const waypointsLatLng = waypoints.map(point => {
+      const waypointsLatLng = waypoints.map(waypoint => {
         return {
           location: new google.maps.LatLng(
-            point.get('latlng')[0],
-            point.get('latlng')[1],
+            waypoint.get('latlng')[0],
+            waypoint.get('latlng')[1],
           ),
         };
       });
@@ -148,24 +149,24 @@
         },
       );
     },
-    handleAdd(marker) {
+    handleAdd(point) {
       this.initPolyline(isError => {
         if (isError) {
-          this.collection.remove(marker);
+          this.collection.remove(point);
         } else {
-          this.initMarker(marker);
+          this.initMarker(point);
         }
       });
     },
     handleRemove() {
       this.initPolyline();
     },
-    handleChange(marker) {
+    handleChange(point) {
       this.initPolyline(isError => {
         if (isError) {
           const [lat, lng] = this.prevMarker.latlng;
           this.prevMarker.marker.setPosition(new google.maps.LatLng(lat, lng));
-          marker.set({ latlng: this.prevMarker.latlng });
+          point.set({ latlng: this.prevMarker.latlng });
         }
       });
     },
@@ -199,19 +200,19 @@
       latlng: [35.583059491197396, 139.63348388671875],
     },
   ];
-  const marker = new Marker();
-  const latlng = new Marker();
-  const markers = new Markers(initialData);
+  const point = new Point();
+  const latlng = new Point();
+  const points = new Points(initialData);
 
   const model = new Backbone.Model();
   model.set({
-    marker,
+    point,
     latlng,
   });
 
   const mapView = new MapView({
     model,
-    collection: markers,
+    collection: points,
   });
   const buttonView = new ButtonView();
 })();
