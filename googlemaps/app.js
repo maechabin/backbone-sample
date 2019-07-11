@@ -28,7 +28,7 @@
       width: '50%',
     },
     initMap() {
-      const [lat, lng] = this.model.get('latlng');
+      const [lat, lng] = this.model.get('marker').get('latlng');
       const mapOptions = {
         center: new google.maps.LatLng(lat, lng),
         zoom: 8,
@@ -60,7 +60,7 @@
     addMarker(markerInfo) {
       const [lat, lng] = markerInfo.get('latlng');
       const icon =
-        markerInfo.get('id') === 1 || markerInfo.get('id') === 2
+        markerInfo.id === 1 || markerInfo.id === 2
           ? 'https://mt.googleapis.com/vt/icon/name=icons/spotlight/spotlight-poi.png&scale=1'
           : 'https://mt.google.com/vt/icon?color=ff004C13&name=icons/spotlight/spotlight-waypoint-blue.png';
       const marker = new google.maps.Marker({
@@ -71,7 +71,7 @@
       });
 
       marker.addListener('click', event => {
-        if (markerInfo.get('id') === 1 || markerInfo.get('id') === 2) {
+        if (markerInfo.id === 1 || markerInfo.id === 2) {
           return;
         }
         this.collection.remove(markerInfo);
@@ -84,7 +84,7 @@
           marker,
           latlng: markerInfo.get('latlng'),
         };
-        markerInfo.set('latlng', [event.latLng.lat(), event.latLng.lng()]);
+        markerInfo.set({ latlng: [event.latLng.lat(), event.latLng.lng()] });
         console.log(`${event.latLng.lat()}, ${event.latLng.lng()}`);
       });
 
@@ -165,7 +165,7 @@
         if (isError) {
           const [lat, lng] = this.prevMarker.latlng;
           this.prevMarker.marker.setPosition(new google.maps.LatLng(lat, lng));
-          marker.set('latlng', this.prevMarker.latlng);
+          marker.set({ latlng: this.prevMarker.latlng });
         }
       });
     },
@@ -200,8 +200,18 @@
     },
   ];
   const marker = new Marker();
+  const latlng = new Marker();
   const markers = new Markers(initialData);
 
-  const mapView = new MapView({ model: marker, collection: markers });
+  const model = new Backbone.Model();
+  model.set({
+    marker,
+    latlng,
+  });
+
+  const mapView = new MapView({
+    model,
+    collection: markers,
+  });
   const buttonView = new ButtonView();
 })();
