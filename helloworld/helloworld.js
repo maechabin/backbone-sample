@@ -1,9 +1,12 @@
 (function() {
   const Who = Backbone.Model.extend({
+    parse(response) {
+      console.log(response);
+    },
     defaults: {
       who: 'world',
     },
-    url: '../',
+    url: 'http://localhost:3000/posts',
     save(key, val, options) {
       console.log(this);
       return Backbone.Model.prototype.save.apply(this, arguments);
@@ -26,14 +29,7 @@
     // It's the first function called when this view it's instantiated.
     initialize: function() {
       this.render();
-      this.model.save(null, {
-        success(model, resp, options) {
-          console.log(arguments);
-        },
-        error(model, resp, options) {
-          console.log(arguments);
-        },
-      });
+      this.model.fetch({ url: 'http://localhost:3000/profile' });
     },
     // $el - it's a cached jQuery object (el), in which you can use jQuery functions
     //       to push content. Like the Hello World in this case.
@@ -42,7 +38,14 @@
     },
 
     handleClick() {
-      alert('click');
+      this.model.save(null, {
+        success(model, resp, options) {
+          console.log(arguments);
+        },
+        error(model, resp, options) {
+          console.log(arguments);
+        },
+      });
     },
   });
 
