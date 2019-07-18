@@ -3,6 +3,9 @@
     parse(response) {
       console.log(response);
     },
+    initialize() {
+      // this.listenTo(this, 'sync', d => console.log(d), this);
+    },
     defaults: {
       who: 'world',
     },
@@ -10,6 +13,13 @@
     save(key, val, options) {
       console.log(this);
       return Backbone.Model.prototype.save.apply(this, arguments);
+    },
+  });
+
+  const Bar = Backbone.View.extend({
+    initialize() {
+      console.log('sync');
+      this.listenTo(this.model, 'sync', d => console.log(d), this);
     },
   });
 
@@ -28,6 +38,7 @@
 
     // It's the first function called when this view it's instantiated.
     initialize: function() {
+      this.bar = new Bar({ model: who });
       this.render();
       this.model.fetch({ url: 'http://localhost:3000/profile' });
     },
@@ -38,14 +49,16 @@
     },
 
     handleClick() {
-      this.model.save(null, {
-        success(model, resp, options) {
-          console.log(arguments);
-        },
-        error(model, resp, options) {
-          console.log(arguments);
-        },
-      });
+      console.log('click');
+      this.model.trigger('sync', this.model, { who: 'bar' });
+      // this.model.save(null, {
+      //   success(model, resp, options) {
+      //     console.log(arguments);
+      //   },
+      //   error(model, resp, options) {
+      //     console.log(arguments);
+      //   },
+      // });
     },
   });
 
