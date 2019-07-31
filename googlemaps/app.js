@@ -112,8 +112,8 @@
         suppressMarkers: true, // マーカーを非表示にする場合はtrue
         preserveViewport: true, // zoomさせないようにする場合はtrue
         polylineOptions: {
-          strokeOpacity: 1.0, // polylineの透明度0.0~1.0
-          strokeWeight: 6, // polylineの幅（ピクセル）
+          strokeOpacity: 0.6, // polylineの透明度0.0~1.0
+          strokeWeight: 8, // polylineの幅（ピクセル）
           strokeColor: '#0072f1', // polylineの色
         },
       });
