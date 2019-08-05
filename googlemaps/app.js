@@ -136,6 +136,16 @@
             this.directionsRenderer.setMap(null);
             this.directionsRenderer.setDirections(response);
             this.directionsRenderer.setMap(this.map); // polylineを地図に表示
+
+            // 総距離を取得
+            let distance = 0;
+            response.routes[0].legs.forEach(item => {
+              distance += item.distance.value;
+            });
+            const totalDistance =
+              Math.floor((distance / 1000) * 10 ** 1) / 10 ** 1;
+            console.log(`${totalDistance} km`);
+
             if (isError) {
               isError(false);
             }
@@ -179,6 +189,10 @@
     },
   });
 
+  /** 総距離を表示するView */
+  const totalDistanceView = Backbone.View.extend({});
+
+  /** リセットボタンを表示するView */
   const ButtonView = Backbone.View.extend({
     el: '.button',
     events: {
